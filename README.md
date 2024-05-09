@@ -17,6 +17,10 @@ npm start
 
 It runs on port 80.
 
+## Supported games
+
+Wii IOS version **IOS37 and above** won't work for sure. If your game use IOS below IOS37, then it should work, but it might need to support more endpoints.
+
 ## Supported endpoints
 
 - POST /ac
@@ -24,3 +28,14 @@ It runs on port 80.
   - action 'svcloc'
 
 For my needs nothing more is required as another server was used for my game (WFC was only a 'frontend connect'), but you might need to handle errors (e.g. keep a list of banned users to block access, etc).
+
+## SSL key and certificate
+
+In the `script` package you will find `nwc-ssl-cert.bat` dedicated to generate the server key and certificate.
+
+## Credits
+
+Contributors of the following GitHub projects :
+- https://github.com/shutterbug2000/wii-ssl-bug
+- https://github.com/barronwaffles/dwc_network_server_emulator
+- https://github.com/Aim4kill/Bug_OldProtoSSL : automated script to generate the ssl key and certificate
