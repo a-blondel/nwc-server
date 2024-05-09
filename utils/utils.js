@@ -3,19 +3,19 @@ const querystring = require("querystring");
 
 
 function base64Encode(input) {
-  let output = Buffer.from(input).toString("base64");
+  var output = new Buffer(input).toString("base64");
   output = output.replace("+", "[").replace("/", "]").replace("=", "_");
   return output;
 }
 
 
-function qs_to_dict(s) {
-  let queryString = querystring.stringify(s);
-  let ret = querystring.parse(queryString);
+function queryStringToMap(queryString) {
+  var queryString = querystring.stringify(queryString);
+  var ret = querystring.parse(queryString);
 
-  for (let k in ret) {
+  for (var k in ret) {
     try {
-      ret[k] = Buffer.from(
+      ret[k] =new Buffer(
         decodeURIComponent(ret[k])
           .replace("*", "=")
           .replace("?", "/")
@@ -31,11 +31,11 @@ function qs_to_dict(s) {
   return ret;
 }
 
-function dict_to_qs(d) {
-  let ret = {};
+function mapToQueryString(map) {
+  var ret = {};
 
-  for (let k in d) {
-    let encoded = Buffer.from(d[k]).toString("base64");
+  for (var k in map) {
+    var encoded =  new Buffer(map[k]).toString("base64");
     encoded = encoded.replace("=", "*");
     ret[k] = encoded;
   }
@@ -43,13 +43,14 @@ function dict_to_qs(d) {
   return querystring.stringify(ret) + "\r\n";
 }
 
-function generateRandomStr(ln, chs = "") {
+function generateRandomStr(length, characters) {
+  characters = characters || "";
   const charset =
-    chs || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  while (result.length < ln) {
-    const buf = crypto.randomBytes(ln);
-    for (let i = 0; i < buf.length && result.length < ln; i++) {
+    characters || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  var result = "";
+  while (result.length < length) {
+    const buf = crypto.randomBytes(length);
+    for (var i = 0; i < buf.length && result.length < length; i++) {
       const randomChar = charset.charAt(buf[i] % charset.length);
       result += randomChar;
     }
@@ -74,8 +75,8 @@ function generateAuthToken(userid, data) {
 }
 
 module.exports = {
-  qs_to_dict,
-  dict_to_qs,
-  generateRandomStr,
-  generateAuthToken,
+  queryStringToMap: queryStringToMap,
+  mapToQueryString: mapToQueryString,
+  generateRandomStr: generateRandomStr,
+  generateAuthToken: generateAuthToken,
 };

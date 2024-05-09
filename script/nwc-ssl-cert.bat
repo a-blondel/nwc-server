@@ -22,7 +22,7 @@ openssl genrsa -aes128 -out %C_NAME%.key.pem -passout pass:123456 1024
 openssl rsa -in %C_NAME%.key.pem -out %C_NAME%.key.pem -passin pass:123456
 
 rem Create certificate signing request of the certificate
-openssl req -new -key %C_NAME%.key.pem -out %C_NAME%.csr -subj "/C=US/ST=Washington/L=Redmond/O=Nintendo of America Inc./CN=Wii NWC Prod 1/emailAddress=ca@noa.nintendo.com"
+openssl req -new -key %C_NAME%.key.pem -out %C_NAME%.csr -subj "/C=US/ST=Washington/L=Redmond/O=Nintendo of America Inc./OU=Nintendo Wifi Network/CN=naswii.nintendowifi.net"
 
 rem Create the certificate
 openssl x509 -req -in %C_NAME%.csr -CA %CA_NAME%.crt -CAkey %CA_NAME%.key.pem -CAcreateserial -out %C_NAME%.crt -days 3600 -md5
@@ -36,6 +36,8 @@ pause
 rem Convert .der to .pem
 openssl x509 -inform der -in %C_NAME%.der -out %C_NAME%.cert.pem
 
+rem Generate the chain
+type NWC.cert.pem NintendoCA.crt > server-chain.pem
 
-echo Done!
+echo Done! Use NWC.key.pem and server-chain.pem in your server configuration
 pause

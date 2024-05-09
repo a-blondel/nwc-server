@@ -1,2 +1,7 @@
 node_modules/
 /certs/*
+/script/*.crt
+/script/*.srl
+/script/*.pem
+/script/*.csr
+/script/*.der

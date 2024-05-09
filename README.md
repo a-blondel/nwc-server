@@ -10,6 +10,10 @@ The main point is that the players don't require a modded Wii (and modded game) 
 
 ## How to run the project
 
+It requires Node version `0.10.33` to handle the deprecated SSLv3 protocol and cipher suite ECDHE-RSA-AES128-SHA.  
+Beware, this poses big security risks !
+
+Then you can use these commands :
 ```
 npm install
 npm start
@@ -32,6 +36,13 @@ For my needs nothing more is required as another server was used for my game (WF
 ## SSL key and certificate
 
 In the `script` package you will find `nwc-ssl-cert.bat` dedicated to generate the server key and certificate.
+
+## host file or DNS
+
+Each route you need to forward to your server much be defined in your hosts file or DNS. E.g. for the hosts file :
+```
+127.0.0.1 naswii.nintendowifi.net
+```
 
 ## Credits
 

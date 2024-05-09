@@ -1,16 +1,17 @@
-const { qs_to_dict } = require('./../utils/utils');
-const { dict_to_qs } = require('./../utils/utils');
-const { generateRandomStr } = require('./../utils/utils');
-const { generateAuthToken } = require('./../utils/utils');
+const utils = require('./../utils/utils');
+const queryStringToMap = utils.queryStringToMap;
+const mapToQueryString = utils.mapToQueryString;
+const generateRandomStr = utils.generateRandomStr;
+const generateAuthToken = utils.generateAuthToken;
 
-module.exports = (req, res) => {
+module.exports = function(req, res) {
   if (!req.body) {
     res.status(400).send("Request body is missing");
     return;
   }
 
   try {
-    const post = qs_to_dict(req.body);
+    const post = queryStringToMap(req.body);
     const client_address =
       req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
@@ -18,7 +19,7 @@ module.exports = (req, res) => {
 
     const action = post["action"].toLowerCase();
 
-    let ret;
+    var ret;
 
     switch (action) {
       case "login":
@@ -65,7 +66,7 @@ module.exports = (req, res) => {
         .toISOString()
         .replace(/T/, "")
         .replace(/\..+/, "");
-      const response = dict_to_qs(ret);
+      const response = mapToQueryString(ret);
       res.setHeader("Content-Length", response.length);
       res.setHeader("Content-type", "text/plain");
       res.setHeader("NODE", "wifiappe1");
