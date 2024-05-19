@@ -6,10 +6,12 @@ const constants = require('constants');
 
 const options = {
   key: fs.readFileSync('./certs/NWC.key.pem'),
-  cert: fs.readFileSync('./certs/server-chain.pem'),
+  cert: fs.readFileSync('./certs/NWC.cert.pem'),
   secureProtocol: 'SSLv23_method',
   secureOptions: constants.SSL_OP_NO_TLSv1_1 | constants.SSL_OP_NO_TLSv1_2 | constants.SSL_OP_NO_TLSv1_3,
-  ciphers: 'RSA_WITH_RC4_128_MD5'
+  ciphers: 'RSA_WITH_RC4_128_SHA1',
+  //requestCert: true,
+  //rejectUnauthorized: false,
 };
 
 const app = express();
