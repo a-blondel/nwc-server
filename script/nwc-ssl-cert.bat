@@ -30,7 +30,7 @@ openssl x509 -req -in %C_NAME%.csr -CA %CA_NAME%.crt -CAkey %CA_NAME%.key.pem -C
 rem ------------Certificate created, now export it to .der format so we can modify it------------
 openssl x509 -outform der -in %C_NAME%.crt -out %C_NAME%.der
 
-echo Der file exported, now patch it manually by replacing "05 00 03 81 81" by "04 00 03 81 81" in the signature portion
+echo Der file exported, now patch it manually by replacing "05 00 03 81 81" with "04 00 03 81 81" in the signature portion
 pause
 
 rem Convert .der to .pem
@@ -39,5 +39,5 @@ openssl x509 -inform der -in %C_NAME%.der -out %C_NAME%.cert.pem
 rem Generate the chain
 type NWC.cert.pem NintendoCA.crt > server-chain.pem
 
-echo Done! Use NWC.key.pem and server-chain.pem in your server configuration
+echo Done! Use %C_NAME%.key.pem and %C_NAME%.cert.pem (or server-chain.pem if you need) in your server configuration
 pause

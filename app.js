@@ -1,9 +1,9 @@
-require('dotenv').config();
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
+const minimist = require('minimist');
 
 const options = {
   key: fs.readFileSync('./certs/NWC.key.pem'),
@@ -19,8 +19,18 @@ app.use(bodyParser.json());
 
 app.post('/ac', handleAc);
 
-const server = https.createServer(options, app);
+let server;
+let port;
+const args = minimist(process.argv.slice(2));
 
-server.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
+if (args.mode === 'https') {
+  server = https.createServer(options, app);
+  port = 443;
+} else {
+  server = http.createServer(app);
+  port = 80;
+}
+
+server.listen(port, () => {
+  console.log(`Server is running on ${args.mode.toUpperCase()} mode, port ${port}`);
 });
