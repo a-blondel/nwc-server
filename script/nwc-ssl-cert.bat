@@ -25,7 +25,7 @@ rem Create certificate signing request of the certificate
 openssl req -new -key %C_NAME%.key.pem -out %C_NAME%.csr -subj "/C=US/ST=Washington/L=Redmond/O=Nintendo of America Inc/CN=naswii.nintendowifi.net"
 
 rem Create the certificate
-openssl x509 -req -in %C_NAME%.csr -CA %CA_NAME%.crt -CAkey %CA_NAME%.key.pem -CAcreateserial -out %C_NAME%.crt -days 3600 -sha1
+openssl x509 -req -in %C_NAME%.csr -CA %CA_NAME%.crt -CAkey %CA_NAME%.key.pem -CAcreateserial -out %C_NAME%.crt -days 3600 -sha1 -extensions v3_ca -extfile nwc-v3.ext -set_serial 100
 
 rem ------------Certificate created, now export it to .der format so we can modify it------------
 openssl x509 -outform der -in %C_NAME%.crt -out %C_NAME%.der

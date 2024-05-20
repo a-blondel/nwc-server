@@ -1,0 +1,14 @@
+[ v3_ca ]
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+keyUsage = critical, digitalSignature, nonRepudiation, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+crlDistributionPoints = @crl_points
+
+[crl_points]
+URI.1 = http://crl.nintendo.com/nintendo-ca.crl
+
+[alt_names]
+DNS.1 = naswii.nintendowifi.net
