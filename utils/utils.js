@@ -3,19 +3,19 @@ const querystring = require("querystring");
 
 
 function base64Encode(input) {
-  var output = new Buffer(input).toString("base64");
+  let output = Buffer.from(input).toString("base64");
   output = output.replace("+", "[").replace("/", "]").replace("=", "_");
   return output;
 }
 
 
-function queryStringToMap(queryString) {
-  var queryString = querystring.stringify(queryString);
-  var ret = querystring.parse(queryString);
+function queryStringToMap(str) {
+  let queryString = querystring.stringify(str);
+  let ret = querystring.parse(queryString);
 
-  for (var k in ret) {
+  for (let k in ret) {
     try {
-      ret[k] =new Buffer(
+      ret[k] = Buffer.from(
         decodeURIComponent(ret[k])
           .replace("*", "=")
           .replace("?", "/")
@@ -32,10 +32,10 @@ function queryStringToMap(queryString) {
 }
 
 function mapToQueryString(map) {
-  var ret = {};
+  let ret = {};
 
-  for (var k in map) {
-    var encoded =  new Buffer(map[k]).toString("base64");
+  for (let k in map) {
+    let encoded =  Buffer.from(map[k]).toString("base64");
     encoded = encoded.replace("=", "*");
     ret[k] = encoded;
   }
@@ -47,10 +47,10 @@ function generateRandomStr(length, characters) {
   characters = characters || "";
   const charset =
     characters || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  var result = "";
+  let result = "";
   while (result.length < length) {
     const buf = crypto.randomBytes(length);
-    for (var i = 0; i < buf.length && result.length < length; i++) {
+    for (let i = 0; i < buf.length && result.length < length; i++) {
       const randomChar = charset.charAt(buf[i] % charset.length);
       result += randomChar;
     }
@@ -75,8 +75,8 @@ function generateAuthToken(userid, data) {
 }
 
 module.exports = {
-  queryStringToMap: queryStringToMap,
-  mapToQueryString: mapToQueryString,
-  generateRandomStr: generateRandomStr,
-  generateAuthToken: generateAuthToken,
+  queryStringToMap,
+  mapToQueryString,
+  generateRandomStr,
+  generateAuthToken,
 };

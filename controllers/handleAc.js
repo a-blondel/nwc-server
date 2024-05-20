@@ -1,10 +1,6 @@
-const utils = require('./../utils/utils');
-const queryStringToMap = utils.queryStringToMap;
-const mapToQueryString = utils.mapToQueryString;
-const generateRandomStr = utils.generateRandomStr;
-const generateAuthToken = utils.generateAuthToken;
+const { queryStringToMap, mapToQueryString, generateRandomStr, generateAuthToken } = require('./../utils/utils');
 
-module.exports = function(req, res) {
+module.exports = (req, res) => {
   if (!req.body) {
     res.status(400).send("Request body is missing");
     return;
@@ -12,15 +8,12 @@ module.exports = function(req, res) {
 
   try {
     const post = queryStringToMap(req.body);
-    const client_address =
-      req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    const client_address = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
     post["ipaddr"] = client_address;
-
     const action = post["action"].toLowerCase();
 
-    var ret;
-
+    let ret;
     switch (action) {
       case "login":
         const challenge = generateRandomStr(8);

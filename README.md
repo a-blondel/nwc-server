@@ -10,8 +10,7 @@ The main point is that the players don't require a modded Wii (and modded game) 
 
 ## How to run the project
 
-It requires Node version `0.10.33` to handle the deprecated SSLv3 protocol and cipher suite ECDHE-RSA-AES128-SHA.  
-Beware, this poses big security risks !
+You must patch node with older openssl to handle the deprecated SSLv3 protocol and cipher suite ECDHE-RSA-AES128-SHA (node version : `22.1.0`)  
 
 Then you can use these commands :
 ```
@@ -19,11 +18,13 @@ npm install
 npm start
 ```
 
-It runs on port 80.
+It runs on port 80 for HTTP and 443 for HTTPS.
 
-## Supported games
+## Supported games over HTTPS
 
-Wii IOS version **IOS37 and above** won't work for sure. If your game use IOS below IOS37, then it should work, but it might need to support more endpoints.
+Wii IOS version **IOS37 and above** won't work for sure. If your game use IOS below IOS37, then it should work, but it might need to support more endpoints.  
+Also it won't work with Dolphin or a modded Wii, so the game has to be patched in order to use HTTP instead of HTTPS.
+
 
 ## Supported endpoints
 
