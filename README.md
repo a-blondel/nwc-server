@@ -1,4 +1,4 @@
-# NWC / WFC Server
+# NWC / WFC / DWC Server
 
 A replacement server for NWC. Useful when you need to change behavior of a service from nintendowifi.net (e.g. when POST naswii.nintendowifi.net/ac returns an error following a server shutdown but you need a success in order to access another game server).  
 
@@ -7,14 +7,15 @@ It is a bundle of two projects :
 - https://github.com/barronwaffles/dwc_network_server_emulator : Implementation of many gamespy endpoints, I extracted the minimum required for my needs, you might find what you need there !
 
 Two main purposes :
-- Using it with https for the players without a modded wii (I repeat, only for games using IOS < 37)
-- Using it with http for the players with a modded wii (it requires to patch the game to use http instead of https, one thing that can be done is to patch using Wimmfi then use a DNS to redirect Wiimmfi domain requests to this server)
+- Using it with https for the players without a modded Wii (I repeat, only for games using IOS < 37)
+- Using it with http for the players with a modded Wii or Dolphin. It requires to patch the game to use http instead of https with a NoSSL patcher (available on some recently updated game loaders for the Wii, and for Dolphin you can use [WIT](https://wit.wiimm.de/wit/) with the `--http` arg to apply it to your game ISO but be warned that it also replaces the sub-domain 'naswii' to 'nas').
 
 The only thing to do is to change the DNS setting of the Wii to this server in both cases.
 
 ## How to run the project
 
-You must patch node with older openssl to handle the deprecated SSLv3 protocol and cipher suite ECDHE-RSA-AES128-SHA (node version : `22.1.0`)  
+You must patch node with older openssl to handle the deprecated SSLv3 protocol and cipher suite ECDHE-RSA-AES128-SHA (node version used : `22.1.0`).  
+If you don't want to bother about patching node, you can also downgrade node to version 0.10.33 and adapt the code to revert ES6 code.   
 
 Pull dependencies
 ```
@@ -53,14 +54,10 @@ In the `script` package you will find `nwc-ssl-cert.bat` dedicated to generate t
 
 ## host file or DNS
 
-Each route you need to forward to your server must be defined in your hosts file or DNS. E.g. for the HTTPS hosts file :
+Each route you need to forward to your server must be defined in your hosts file or DNS. E.g.  :
 ```
 127.0.0.1 naswii.nintendowifi.net
-```
-
-You might want to use the wiimmfi patcher to force the game to use HTTP, so to use this server the hosts file would be :
-```
-127.0.0.1 nas.wiimmfi.de
+127.0.0.1 nas.nintendowifi.net
 ```
 
 ## Credits
