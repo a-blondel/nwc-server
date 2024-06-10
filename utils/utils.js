@@ -1,21 +1,19 @@
-const crypto = require("crypto");
-const querystring = require("querystring");
-
+var crypto = require("crypto");
+var querystring = require("querystring");
 
 function base64Encode(input) {
-  let output = Buffer.from(input).toString("base64");
+  var output = new Buffer(input).toString("base64");
   output = output.replace("+", "[").replace("/", "]").replace("=", "_");
   return output;
 }
 
-
 function queryStringToMap(str) {
-  let queryString = querystring.stringify(str);
-  let ret = querystring.parse(queryString);
+  var queryString = querystring.stringify(str);
+  var ret = querystring.parse(queryString);
 
-  for (let k in ret) {
+  for (var k in ret) {
     try {
-      ret[k] = Buffer.from(
+      ret[k] = new Buffer(
         decodeURIComponent(ret[k])
           .replace("*", "=")
           .replace("?", "/")
@@ -32,10 +30,10 @@ function queryStringToMap(str) {
 }
 
 function mapToQueryString(map) {
-  let ret = {};
+  var ret = {};
 
-  for (let k in map) {
-    let encoded =  Buffer.from(map[k]).toString("base64");
+  for (var k in map) {
+    var encoded = new Buffer(map[k]).toString("base64");
     encoded = encoded.replace("=", "*");
     ret[k] = encoded;
   }
@@ -45,13 +43,13 @@ function mapToQueryString(map) {
 
 function generateRandomStr(length, characters) {
   characters = characters || "";
-  const charset =
+  var charset =
     characters || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
+  var result = "";
   while (result.length < length) {
-    const buf = crypto.randomBytes(length);
-    for (let i = 0; i < buf.length && result.length < length; i++) {
-      const randomChar = charset.charAt(buf[i] % charset.length);
+    var buf = crypto.randomBytes(length);
+    for (var i = 0; i < buf.length && result.length < length; i++) {
+      var randomChar = charset.charAt(buf[i] % charset.length);
       result += randomChar;
     }
   }
@@ -59,8 +57,8 @@ function generateRandomStr(length, characters) {
 }
 
 function generateAuthToken(userid, data) {
-  const size = 80;
-  const authtoken = "NDS" + generateRandomStr(size);
+  var size = 80;
+  var authtoken = "NDS" + generateRandomStr(size);
 
   if ("devname" in data) {
     data["devname"] = base64Encode(data["devname"]);
@@ -75,8 +73,8 @@ function generateAuthToken(userid, data) {
 }
 
 module.exports = {
-  queryStringToMap,
-  mapToQueryString,
-  generateRandomStr,
-  generateAuthToken,
+  queryStringToMap: queryStringToMap,
+  mapToQueryString: mapToQueryString,
+  generateRandomStr: generateRandomStr,
+  generateAuthToken: generateAuthToken,
 };

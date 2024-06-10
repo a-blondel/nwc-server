@@ -1,37 +1,37 @@
-const { queryStringToMap, mapToQueryString, generateRandomStr, generateAuthToken } = require('./../utils/utils');
+var utils = require('./../utils/utils');
 
-module.exports = (req, res) => {
+module.exports = function(req, res) {
   if (!req.body) {
     res.status(400).send("Request body is missing");
     return;
   }
 
   try {
-    const post = queryStringToMap(req.body);
-    const client_address = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    var post = utils.queryStringToMap(req.body);
+    var client_address = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
     post["ipaddr"] = client_address;
-    const action = post["action"].toLowerCase();
+    var action = post["action"].toLowerCase();
 
-    let ret;
+    var ret;
     switch (action) {
       case "login":
-        const challenge = generateRandomStr(8);
-        const authtoken = generateAuthToken(req.body.userid, req.body);
+        var challenge = utils.generateRandomStr(8);
+        var authtoken = utils.generateAuthToken(req.body.userid, req.body);
         ret = {
           retry: "0",
           returncd: "001",
           locator: "gamespy.com",
           challenge: challenge,
-          token: authtoken,
+          token: authtoken
         };
         break;
       case "svcloc":
-        const authtokenSvc = generateAuthToken(req.body.userid, req.body);
+        var authtokenSvc = utils.generateAuthToken(req.body.userid, req.body);
         ret = {
           retry: "0",
           returncd: "007",
-          statusdata: "Y",
+          statusdata: "Y"
         };
         if ("svc" in req.body) {
           if (req.body.svc === "9000" || req.body.svc === "9001") {
@@ -59,7 +59,7 @@ module.exports = (req, res) => {
         .toISOString()
         .replace(/T/, "")
         .replace(/\..+/, "");
-      const response = mapToQueryString(ret);
+      var response = utils.mapToQueryString(ret);
       res.setHeader("Content-Length", response.length);
       res.setHeader("Content-type", "text/plain");
       res.setHeader("NODE", "wifiappe1");
