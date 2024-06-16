@@ -12,10 +12,44 @@ Two main purposes :
 
 The only thing to do is to change the DNS setting of the Wii to this server in both cases.
 
-## How to run the project
+## Supported games over HTTPS
 
-You must patch node with older openssl to handle the deprecated SSLv3 protocol and cipher suite ECDHE-RSA-AES128-SHA (node version used : `22.1.0`).  
-If you don't want to bother about patching node, you can also downgrade node to version 0.10.33 and adapt the code to revert ES6 code.   
+Wii IOS version **IOS37 and above** won't work for sure. If your game use IOS below IOS37, then it should work, but it might need to support more endpoints.  
+Also it won't work with Dolphin or a modded Wii, so the game has to be patched in order to use HTTP instead of HTTPS.
+
+## Supported endpoints
+
+- POST /ac
+  - action 'login'
+  - action 'svcloc'
+
+For my needs nothing more is required as another server was used for my game (WFC was only a 'frontend connect'), but you might need to handle errors (e.g. keep a list of banned users to block access, etc).
+
+## SSL key and certificate
+
+In order to make the https version to work, you need a server key and certificate.  
+In the `scripts` package you will find `nwc-ssl-cert.bat` dedicated to generate the server key and certificate.  
+Once generated, put them in a `certs` folder at the root of the project.
+
+Important notes :
+- You will surely need to edit your `openssl.cnf` file to set `string_mask = default` (instead of utf8only) for some games to correctly read the certificate
+- Some games won't be able to read certificates past 2050 (X509 certificate validity period is in `UTCTime` format until 2049, then starting from 2050 it's in `GeneralizedTime` format), but thankfully many games don't check the expiry date so you can use an expired date in UTF8STRING format and you'll be fine
+
+## host file or DNS
+
+Each route you need to forward to your server must be defined in your hosts file or DNS. E.g.  :
+```
+127.0.0.1 naswii.nintendowifi.net
+127.0.0.1 nas.nintendowifi.net
+```
+
+## Start the project
+
+### Using node
+
+The project requires node version 0.10.33 to accept deprecated SSL protocols (SSLv2, SSLv3) and cipher suites (ECDHE-RSA-AES128-SHA).  
+If you want to use a recent version of node, you must patch node and openssl to accept the deprecated SSL protocols and cipher suites.
+
 
 Pull dependencies
 ```
@@ -34,59 +68,20 @@ npm run start-https
 
 It runs on port 80 for HTTP and 443 for HTTPS.
 
-## Supported games over HTTPS
+### Using docker-compose
 
-Wii IOS version **IOS37 and above** won't work for sure. If your game use IOS below IOS37, then it should work, but it might need to support more endpoints.  
-Also it won't work with Dolphin or a modded Wii, so the game has to be patched in order to use HTTP instead of HTTPS.
+To run the servers in containers, you can use the provided docker-compose.  
 
+First, make sure you have generated the server key and certificate, and moved them in a `certs` folder at the root of the project.  
 
-## Supported endpoints
-
-- POST /ac
-  - action 'login'
-  - action 'svcloc'
-
-For my needs nothing more is required as another server was used for my game (WFC was only a 'frontend connect'), but you might need to handle errors (e.g. keep a list of banned users to block access, etc).
-
-## SSL key and certificate
-
-In the `script` package you will find `nwc-ssl-cert.bat` dedicated to generate the server key and certificate.
-
-## host file or DNS
-
-Each route you need to forward to your server must be defined in your hosts file or DNS. E.g.  :
-```
-127.0.0.1 naswii.nintendowifi.net
-127.0.0.1 nas.nintendowifi.net
-```
-
-## Dockerfiles
-
-In order to run the server in a container, you can use the provided Dockerfiles.
-
-First, the patched version of node (to allow SSLv3 and RC4 cipher algorithm) is located in the `node-sslv3-rc4` folder.  
-You can build the image with the following command :
-```
-docker build -t node-sslv3-rc4 .
-```
-Note that it takes a while. This image is also hosted on GitHub Packages so you don't need to build it yourself, but you need to authenticate with your GitHub account to pull the image (replace `USERNAME` with your GitHub username, generate a token at https://github.com/settings/tokens with the `read:packages` scope, and replace `TOKEN` with the generated token) :
+The Dockerfile requires the `node:0.10.33-jessie` image that is hosted on GitHub Packages -so you don't need to build it yourself- but you need to authenticate with your GitHub account to pull the image (replace `USERNAME` with your GitHub username, generate a token at https://github.com/settings/tokens with the `read:packages` scope, and replace `$TOKEN` with the generated token) :
 ```
 echo $TOKEN | docker login ghcr.io -u USERNAME --password-stdin
-docker pull ghcr.io/a-blondel/nwc-server/node-sslv3-rc4:latest
 ```
 
-Then, you can build the server image (root folder) with the following command :
+Then, you can build and start the server images (be sure to be on the project root folder) :
 ```
-docker build -t nwc-server:latest .
-```
-Adapt the base image if needed.  
-
-Finally, you can run the server with the following command (https mode requires to mount the SSL key and certificate from your host machine, e.g. /etc/ssl/certs, don't forget to provide them ! They can be generated thanks to the `nwc-ssl-cert.bat` script in the `script` package) :
-```
-docker run -d -p 80:80 -v /etc/ssl/certs:/app/certs nwc-server start-http
-```
-```
-docker run -d -p 443:443 -v /etc/ssl/certs:/app/certs nwc-server start-https
+docker-compose up -d --build
 ```
 
 ## Credits

@@ -1,0 +1,17 @@
+version: '3'
+services:
+  nwc-http:
+    build: .
+    image: nwc-app
+    command: start-http
+    ports:
+      - 80:80
+    volumes:
+      - ./certs:/app/certs
+  nwc-https:
+    image: nwc-app
+    command: start-https
+    ports:
+      - 443:443
+    volumes:
+      - ./certs:/app/certs

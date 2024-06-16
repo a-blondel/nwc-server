@@ -36,8 +36,12 @@ pause
 rem Convert .der to .pem
 openssl x509 -inform der -in %C_NAME%.der -out %C_NAME%.cert.pem
 
-rem Generate the chain
-type NWC.cert.pem NintendoCA.crt > server-chain.pem
+rem Delete the files
+del /Q %CA_NAME%.crt
+del /Q %CA_NAME%.key.pem
+del /Q %C_NAME%.crt
+del /Q %C_NAME%.csr
+del /Q %C_NAME%.der
 
-echo Done! Use %C_NAME%.key.pem and %C_NAME%.cert.pem (or server-chain.pem if you need) in your server configuration
+echo Done! Use %C_NAME%.key.pem and %C_NAME%.cert.pem in your server configuration
 pause
