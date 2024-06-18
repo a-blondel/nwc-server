@@ -1,7 +1,7 @@
 var crypto = require("crypto");
 var querystring = require("querystring");
 
-function sendHttpResponse(res, status, body) {
+function sendHttpResponse(socket, status, body) {
   var httpResponse = [
     'HTTP/1.1 ' + status,
     'Content-Length: ' + body.length,
@@ -11,8 +11,9 @@ function sendHttpResponse(res, status, body) {
     body
   ].join('\r\n');
 
-  console.log("Response:\r\n", httpResponse);
-  res.socket.write(httpResponse);
+  console.log("--- Response to " + socket.remoteAddress + " ---\r\n", httpResponse, "\r\n\r\n");
+  socket.write(httpResponse);
+  socket.end();
 }
 
 

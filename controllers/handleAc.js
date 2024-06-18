@@ -1,28 +1,27 @@
 var utils = require('./../utils/utils');
 
-module.exports = function(req, res) {
+module.exports = function(socket, request) {
   var status;
   var body;
 
-  if (!req.body) {
+  if (Object.keys(request.body).length === 0) {
     status = '400 Bad Request';
     body = "Request body is missing";
-    utils.sendHttpResponse(res, status, body);
+    utils.sendHttpResponse(socket, status, body);
     return;
   }
 
   try {
-    var post = utils.queryStringToMap(req.body);
-    var client_address = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    var post = utils.queryStringToMap(request.body);
 
-    post["ipaddr"] = client_address;
+    post["ipaddr"] = socket.remoteAddress;
     var action = post["action"].toLowerCase();
 
     var ret;
     switch (action) {
       case "login":
         var challenge = utils.generateRandomStr(8);
-        var authtoken = utils.generateAuthToken(req.body.userid, req.body);
+        var authtoken = utils.generateAuthToken(request.body.userid, request.body);
         ret = {
           retry: "0",
           returncd: "001",
@@ -32,21 +31,21 @@ module.exports = function(req, res) {
         };
         break;
       case "svcloc":
-        var authtokenSvc = utils.generateAuthToken(req.body.userid, req.body);
+        var authtokenSvc = utils.generateAuthToken(request.body.userid, request.body);
         ret = {
           retry: "0",
           returncd: "007",
           statusdata: "Y"
         };
-        if ("svc" in req.body) {
-          if (req.body.svc === "9000" || req.body.svc === "9001") {
-            ret["svchost"] = req.headers.host.split(",")[0];
-            if (req.body.svc === "9000") {
+        if ("svc" in request.body) {
+          if (request.body.svc === "9000" || request.body.svc === "9001") {
+            ret["svchost"] = request.headers.host.split(",")[0];
+            if (request.body.svc === "9000") {
               ret["token"] = authtokenSvc;
             } else {
               ret["servicetoken"] = authtokenSvc;
             }
-          } else if (req.body.svc === "0000") {
+          } else if (request.body.svc === "0000") {
             ret["servicetoken"] = authtokenSvc;
             ret["svchost"] = "n/a";
           } else {
@@ -71,5 +70,5 @@ module.exports = function(req, res) {
   } catch (error) {
     console.error("Exception occurred on POST request!", error);
   }
-  utils.sendHttpResponse(res, status, body);
+  utils.sendHttpResponse(socket, status, body);
 };
