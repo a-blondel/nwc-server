@@ -1,6 +1,21 @@
 var crypto = require("crypto");
 var querystring = require("querystring");
 
+function sendHttpResponse(res, status, body) {
+  var httpResponse = [
+    'HTTP/1.1 ' + status,
+    'Content-Length: ' + body.length,
+    'Content-Type: text/plain',
+    'NODE: wifiappe1',
+    '',
+    body
+  ].join('\r\n');
+
+  console.log("Response:\r\n", httpResponse);
+  res.socket.write(httpResponse);
+}
+
+
 function base64Encode(input) {
   var output = new Buffer(input).toString("base64");
   output = output.replace("+", "[").replace("/", "]").replace("=", "_");
@@ -77,4 +92,5 @@ module.exports = {
   mapToQueryString: mapToQueryString,
   generateRandomStr: generateRandomStr,
   generateAuthToken: generateAuthToken,
+  sendHttpResponse: sendHttpResponse,
 };

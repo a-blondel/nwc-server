@@ -1,8 +1,13 @@
 var utils = require('./../utils/utils');
 
 module.exports = function(req, res) {
+  var status;
+  var body;
+
   if (!req.body) {
-    res.status(400).send("Request body is missing");
+    status = '400 Bad Request';
+    body = "Request body is missing";
+    utils.sendHttpResponse(res, status, body);
     return;
   }
 
@@ -51,7 +56,8 @@ module.exports = function(req, res) {
         }
         break;
       default:
-        res.status(400).send("Invalid action");
+        status = '400 Bad Request';
+        body = "Invalid action";
     }
 
     if (ret) {
@@ -59,13 +65,11 @@ module.exports = function(req, res) {
         .toISOString()
         .replace(/T/, "")
         .replace(/\..+/, "");
-      var response = utils.mapToQueryString(ret);
-      res.setHeader("Content-Length", response.length);
-      res.setHeader("Content-type", "text/plain");
-      res.setHeader("NODE", "wifiappe1");
-      res.send(response);
+      body = utils.mapToQueryString(ret);
+      status = '200 OK';
     }
   } catch (error) {
     console.error("Exception occurred on POST request!", error);
   }
+  utils.sendHttpResponse(res, status, body);
 };

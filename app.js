@@ -1,36 +1,55 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var https = require('https');
+var net = require('net');
 var http = require('http');
-var fs = require('fs');
-var minimist = require('minimist');
+var querystring = require("querystring");
 var handleAc = require('./controllers/handleAc');
+var utils = require('./utils/utils');
 
-var options = {
-  key: fs.readFileSync('./certs/NWC.key.pem'),
-  cert: fs.readFileSync('./certs/NWC.cert.pem'),
-};
+var server = net.createServer(function(socket) {
+  socket.on('data', function(data) {
+    var response = new http.ServerResponse(socket);
+    var request = new http.IncomingMessage(socket);
 
-var app = express();
+    request.headers = {};
+    request.rawHeaders = [];
 
+    response.socket = socket;
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+    var lines = data.toString().split('\r\n');
 
-app.post('/ac', handleAc);
+    var requestLine = lines[0].split(' ');
+    if (requestLine.length < 3 || requestLine[2].indexOf('HTTP/') !== 0) {
+        console.log('Received non-HTTP data:', data.toString());
+        return;
+    }
+    request.method = requestLine[0];
+    request.url = requestLine[1];
+    request.httpVersion = requestLine[2].split('/')[1];
 
-var server;
-var port;
-var args = minimist(process.argv.slice(2));
+    var i = 1;
+    while (lines[i] !== '') {
+        var header = lines[i].split(': ');
+        request.headers[header[0].toLowerCase()] = header[1];
+        i++;
+    }
 
-if (args.mode === 'https') {
-  server = https.createServer(options, app);
-  port = 443;
-} else {
-  server = http.createServer(app);
-  port = 80;
-}
+    var body = lines.slice(i + 1).join('\r\n');
+    if (body) {
+        request.body = querystring.parse(body);
+    }
 
-server.listen(port, function() {
-  console.log('Server is running on ' + args.mode.toUpperCase() + ' mode, port ' + port);
+    if (request.httpVersion) {
+      var clientIp = request.headers["x-forwarded-for"] || request.connection.remoteAddress;
+      console.log('Request:\r\n', clientIp, request.method, request.url, request.httpVersion, '\r\n', request.headers, '\r\n', body);
+      if (request.method === 'POST' && request.url === '/ac') {
+        handleAc(request, response);
+      } else {
+        utils.sendHttpResponse(response, '404 Not Found', 'Not Found');
+      }
+
+    } else {
+      socket.write('Hello, TCP client!\n');
+    }
+  });
 });
+
+server.listen(80);
