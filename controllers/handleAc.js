@@ -1,51 +1,44 @@
-var utils = require('./../utils/utils');
+const { queryStringToMap, mapToQueryString, generateRandomStr, generateAuthToken } = require("../utils/utils");
 
-module.exports = function(socket, request) {
-  var status;
-  var body;
-
-  if (Object.keys(request.body).length === 0) {
-    status = '400 Bad Request';
-    body = "Request body is missing";
-    utils.sendHttpResponse(socket, status, body);
-    return;
+module.exports = function (req, res) {
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).send("Request body is missing");
   }
 
   try {
-    var post = utils.queryStringToMap(request.body);
+    const post = queryStringToMap(req.body);
+    const action = (post["action"] || "").toLowerCase();
 
-    post["ipaddr"] = socket.remoteAddress;
-    var action = post["action"].toLowerCase();
-
-    var ret;
+    let ret;
     switch (action) {
-      case "login":
-        var challenge = utils.generateRandomStr(8);
-        var authtoken = utils.generateAuthToken(request.body.userid, request.body);
+      case "login": {
+        const challenge = generateRandomStr(8);
+        const authtoken = generateAuthToken(req.body.userid, req.body);
         ret = {
           retry: "0",
           returncd: "001",
           locator: "gamespy.com",
           challenge: challenge,
-          token: authtoken
+          token: authtoken,
         };
         break;
-      case "svcloc":
-        var authtokenSvc = utils.generateAuthToken(request.body.userid, request.body);
+      }
+      case "svcloc": {
+        const authtokenSvc = generateAuthToken(req.body.userid, req.body);
         ret = {
           retry: "0",
           returncd: "007",
-          statusdata: "Y"
+          statusdata: "Y",
         };
-        if ("svc" in request.body) {
-          if (request.body.svc === "9000" || request.body.svc === "9001") {
-            ret["svchost"] = request.headers.host.split(",")[0];
-            if (request.body.svc === "9000") {
+        if ("svc" in req.body) {
+          if (req.body.svc === "9000" || req.body.svc === "9001") {
+            ret["svchost"] = req.headers.host.split(",")[0];
+            if (req.body.svc === "9000") {
               ret["token"] = authtokenSvc;
             } else {
               ret["servicetoken"] = authtokenSvc;
             }
-          } else if (request.body.svc === "0000") {
+          } else if (req.body.svc === "0000") {
             ret["servicetoken"] = authtokenSvc;
             ret["svchost"] = "n/a";
           } else {
@@ -54,9 +47,9 @@ module.exports = function(socket, request) {
           }
         }
         break;
+      }
       default:
-        status = '400 Bad Request';
-        body = "Invalid action";
+        return res.status(400).send("Invalid action");
     }
 
     if (ret) {
@@ -64,11 +57,14 @@ module.exports = function(socket, request) {
         .toISOString()
         .replace(/T/, "")
         .replace(/\..+/, "");
-      body = utils.mapToQueryString(ret);
-      status = '200 OK';
+      const body = mapToQueryString(ret);
+      //console.log(`[${new Date().toISOString()}] POST /ac action=${action} from=${req.ip}`);
+      res.set("Content-Type", "text/plain");
+      res.set("NODE", "wifiappe1");
+      res.send(body);
     }
   } catch (error) {
-    console.error("Exception occurred on POST request!", error);
+    console.error("Exception occurred on POST /ac:", error);
+    res.status(500).send("Internal Server Error");
   }
-  utils.sendHttpResponse(socket, status, body);
 };

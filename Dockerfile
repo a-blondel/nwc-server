@@ -1,20 +1,15 @@
-FROM ghcr.io/a-blondel/node:0.10.33-jessie
+FROM node:22-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install --production \
-    && npm cache clean --force
+RUN npm ci --omit=dev
 
 COPY app.js .
 COPY controllers controllers
 COPY utils utils
 
-RUN mkdir certs
-
 EXPOSE 80
-EXPOSE 443
 
-ENTRYPOINT ["npm", "run"]
-CMD ["start-http"]
+CMD ["node", "app.js"]
