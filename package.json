@@ -1,18 +1,18 @@
 {
   "name": "nwc-server",
-  "version": "0.1.0",
-  "description": "",
+  "version": "1.0.0",
+  "description": "Nintendo Wi-Fi Connection authentication server",
   "main": "app.js",
   "scripts": {
-    "start-http": "node app.js --mode=http",
-    "start-https": "node app.js --mode=https"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
-    "body-parser": "^1.20.2",
-    "express": "^4.19.2",
-    "minimist": "^1.2.8"
+    "express": "^5.1.0"
   }
 }

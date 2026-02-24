@@ -1,28 +1,28 @@
-var crypto = require("crypto");
-var querystring = require("querystring");
+const crypto = require("crypto");
+const querystring = require("querystring");
 
 function base64Encode(input) {
-  var output = new Buffer(input).toString("base64");
-  output = output.replace("+", "[").replace("/", "]").replace("=", "_");
+  let output = Buffer.from(input).toString("base64");
+  output = output.replaceAll("+", "[").replaceAll("/", "]").replaceAll("=", "_");
   return output;
 }
 
-function queryStringToMap(str) {
-  var queryString = querystring.stringify(str);
-  var ret = querystring.parse(queryString);
+function queryStringToMap(body) {
+  const qs = querystring.stringify(body);
+  const ret = querystring.parse(qs);
 
-  for (var k in ret) {
+  for (const k in ret) {
     try {
-      ret[k] = new Buffer(
+      ret[k] = Buffer.from(
         decodeURIComponent(ret[k])
-          .replace("*", "=")
-          .replace("?", "/")
-          .replace(">", "+")
-          .replace("-", "/"),
+          .replaceAll("*", "=")
+          .replaceAll("?", "/")
+          .replaceAll(">", "+")
+          .replaceAll("-", "/"),
         "base64"
       ).toString("utf8");
     } catch (e) {
-      ret[k] = ret[k];
+      // keep original value if decoding fails
     }
   }
 
@@ -30,35 +30,29 @@ function queryStringToMap(str) {
 }
 
 function mapToQueryString(map) {
-  var ret = {};
+  const ret = {};
 
-  for (var k in map) {
-    var encoded = new Buffer(map[k]).toString("base64");
-    encoded = encoded.replace("=", "*");
+  for (const k in map) {
+    let encoded = Buffer.from(map[k]).toString("base64");
+    encoded = encoded.replaceAll("=", "*");
     ret[k] = encoded;
   }
 
   return querystring.stringify(ret) + "\r\n";
 }
 
-function generateRandomStr(length, characters) {
-  characters = characters || "";
-  var charset =
-    characters || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  var result = "";
-  while (result.length < length) {
-    var buf = crypto.randomBytes(length);
-    for (var i = 0; i < buf.length && result.length < length; i++) {
-      var randomChar = charset.charAt(buf[i] % charset.length);
-      result += randomChar;
-    }
+function generateRandomStr(length) {
+  const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  const buf = crypto.randomBytes(length);
+  for (let i = 0; i < length; i++) {
+    result += charset.charAt(buf[i] % charset.length);
   }
   return result;
 }
 
 function generateAuthToken(userid, data) {
-  var size = 80;
-  var authtoken = "NDS" + generateRandomStr(size);
+  const authtoken = "NDS" + generateRandomStr(80);
 
   if ("devname" in data) {
     data["devname"] = base64Encode(data["devname"]);
@@ -67,14 +61,12 @@ function generateAuthToken(userid, data) {
     data["ingamesn"] = base64Encode(data["ingamesn"]);
   }
 
-  data = JSON.stringify(data);
-
   return authtoken;
 }
 
 module.exports = {
-  queryStringToMap: queryStringToMap,
-  mapToQueryString: mapToQueryString,
-  generateRandomStr: generateRandomStr,
-  generateAuthToken: generateAuthToken,
+  queryStringToMap,
+  mapToQueryString,
+  generateRandomStr,
+  generateAuthToken,
 };

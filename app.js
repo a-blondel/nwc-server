@@ -1,36 +1,21 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var https = require('https');
-var http = require('http');
-var fs = require('fs');
-var minimist = require('minimist');
-var handleAc = require('./controllers/handleAc');
+const express = require("express");
+const handleAc = require("./controllers/handleAc");
 
-var options = {
-  key: fs.readFileSync('./certs/NWC.key.pem'),
-  cert: fs.readFileSync('./certs/NWC.cert.pem'),
-};
+const app = express();
+const PORT = 80;
 
-var app = express();
+app.use(express.urlencoded({ extended: false }));
 
+app.post("/ac", handleAc);
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.get("/health", (req, res) => {
+  res.send("OK");
+});
 
-app.post('/ac', handleAc);
+app.use((req, res) => {
+  res.status(404).send("Not Found");
+});
 
-var server;
-var port;
-var args = minimist(process.argv.slice(2));
-
-if (args.mode === 'https') {
-  server = https.createServer(options, app);
-  port = 443;
-} else {
-  server = http.createServer(app);
-  port = 80;
-}
-
-server.listen(port, function() {
-  console.log('Server is running on ' + args.mode.toUpperCase() + ' mode, port ' + port);
+app.listen(PORT, () => {
+  console.log(`NWC server listening on port ${PORT}`);
 });
