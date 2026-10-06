@@ -22,6 +22,10 @@ Also it won't work with Dolphin or a modded Wii, so the game has to be patched i
 - POST /ac
   - action 'login'
   - action 'svcloc'
+- GET (any path) : connection test
+  - Answers `200` with the `X-Organization: Nintendo` header that the Wii system connection test looks for, mirroring `do_GET` in dwc_network_server_emulator's `nas_server.py`.
+  - Only needed as a fallback : Nintendo still serves `conntest.nintendowifi.net`, so point that domain at this server only if you want to stop depending on them (or once they shut it down).
+  - `GET /health` keeps returning `OK` and is not affected.
 
 For my needs nothing more is required as another server was used for my game (WFC was only a 'frontend connect'), but you might need to handle errors (e.g. keep a list of banned users to block access, etc).
 
@@ -41,7 +45,12 @@ Each route you need to forward to your server must be defined in your hosts file
 ```
 127.0.0.1 naswii.nintendowifi.net
 127.0.0.1 nas.nintendowifi.net
+127.0.0.1 conntest.nintendowifi.net
 ```
+
+Add the `conntest.nintendowifi.net` entry only if you want this server to answer the Wii connection test instead of Nintendo.
+
+Beware that the Wii sends its `Host` header twice. Node accepts it, but most reverse proxies reject the request with a `400` before it ever reaches this server, so route by path (`/ac` and `/`) rather than by host, or strip the duplicate upstream.
 
 ## Start the project
 
