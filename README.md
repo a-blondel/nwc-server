@@ -23,7 +23,7 @@ Also it won't work with Dolphin or a modded Wii, so the game has to be patched i
   - action 'login'
   - action 'svcloc'
 - GET (any path) : connection test
-  - Answers `200` with the `X-Organization: Nintendo` header that the Wii system connection test looks for, mirroring `do_GET` in dwc_network_server_emulator's `nas_server.py`.
+  - Answers `200` with the `X-Organization: Nintendo` header and Nintendo's own test page body. The Wii only validates the header (`do_GET` in dwc_network_server_emulator's `nas_server.py` returns a bare `ok`), but the Wii U also checks the body, so the full page is reproduced from [PretendoNetwork/account](https://github.com/PretendoNetwork/account/blob/master/src/services/conntest/index.ts), the Wii U / 3DS counterpart of dwc. One response satisfies both consoles.
   - Only needed as a fallback : Nintendo still serves `conntest.nintendowifi.net`, so point that domain at this server only if you want to stop depending on them (or once they shut it down).
   - `GET /health` keeps returning `OK` and is not affected.
 
